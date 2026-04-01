@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Footer from "@/components/home/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Phone, MapPin, Save, Camera } from "lucide-react";
+import { User, Mail, Phone, MapPin, Save } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -30,37 +31,41 @@ const Profile = () => {
   }, [user]);
 
   const fetchProfile = async () => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user!.id)
-      .single();
+    try {
+      const docRef = doc(db, "users", user!.uid);
+      const docSnap = await getDoc(docRef);
 
-    if (data) {
-      setProfile({
-        full_name: data.full_name || "",
-        phone: data.phone || "",
-        address: data.address || "",
-      });
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setProfile({
+          full_name: data.full_name || data.name || "",
+          phone: data.phone || "",
+          address: data.address || "",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err);
     }
   };
 
   const handleSave = async () => {
+    if (!user) return;
     setLoading(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: profile.full_name,
-        phone: profile.phone,
-        address: profile.address,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user!.id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      const docRef = doc(db, "users", user.uid);
+      await setDoc(
+        docRef,
+        {
+          full_name: profile.full_name,
+          phone: profile.phone,
+          address: profile.address,
+          updatedAt: new Date(),
+        },
+        { merge: true } // keeps existing fields like role, email, etc.
+      );
       toast({ title: "Profile updated!", description: "Your changes have been saved." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Something went wrong", variant: "destructive" });
     }
     setLoading(false);
   };

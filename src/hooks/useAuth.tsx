@@ -1,56 +1,43 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
+import { onAuthStateChanged, signOut as firebaseSignOut, User } from "firebase/auth";
 
 interface AuthContextType {
-  session: Session | null;
   user: User | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  logout: () => Promise<void>;
+  signOut: () => Promise<void>; // alias used by Navbar
 }
 
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  loading: true,
-  signOut: async () => {},
-});
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
+  const logout = async () => {
+    await firebaseSignOut(auth);
   };
 
+  // Navbar calls signOut, so expose both names pointing to the same fn
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, logout, signOut: logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+};

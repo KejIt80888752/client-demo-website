@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Camera, Home, Briefcase, Image, User, LogOut, Menu, X } from "lucide-react";
+import {Home, Briefcase, Image, User, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Home", path: "/", icon: Home },
@@ -21,10 +22,13 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <Camera className="h-7 w-7 text-primary transition-transform group-hover:rotate-12" />
-          <span className="text-xl font-display font-bold tracking-tight">KejShots</span>
-        </Link>
+<Link to="/" className="flex items-center group">
+  <img
+    src={logo}
+    alt="KejShots Logo"
+    className="h-20 w-25 "
+  />
+</Link>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
