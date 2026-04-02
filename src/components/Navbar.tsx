@@ -29,8 +29,48 @@ const Navbar = () => {
         height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         {/* Logo */}
-        <Link to="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          <img src={logo} alt="KejShots Logo" style={{ height: "80px", width: "auto" }} />
+        <Link
+          to="/"
+          style={{
+            display: "flex", alignItems: "center", flexShrink: 0,
+            textDecoration: "none",
+            // subtle pill container so the logo pops against the navbar
+            padding: "4px 10px 4px 4px",
+            borderRadius: "14px",
+            background: "rgba(220,30,30,0.06)",
+            border: "1px solid rgba(220,30,30,0.18)",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(220,30,30,0.12)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(220,30,30,0.40)";
+            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px -4px rgba(220,30,30,0.35)";
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(220,30,30,0.06)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(220,30,30,0.18)";
+            (e.currentTarget as HTMLElement).style.boxShadow = "none";
+          }}
+        >
+          <img
+            src={logo}
+            alt="KejShots Logo"
+            style={{
+              height: "52px",
+              width: "auto",
+              // boost brightness so the logo image itself is crisp & vivid
+              filter: "brightness(1.25) contrast(1.1) drop-shadow(0 0 8px rgba(220,30,30,0.45))",
+              transition: "filter 0.2s",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLImageElement).style.filter =
+                "brightness(1.4) contrast(1.15) drop-shadow(0 0 14px rgba(220,30,30,0.65))";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLImageElement).style.filter =
+                "brightness(1.25) contrast(1.1) drop-shadow(0 0 8px rgba(220,30,30,0.45))";
+            }}
+          />
         </Link>
 
         {/* Nav links */}
