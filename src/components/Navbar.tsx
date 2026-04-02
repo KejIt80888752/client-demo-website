@@ -1,37 +1,40 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import {Home, Briefcase, Image, User, LogOut, Menu, X } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { Home, Briefcase, Image, User, LogOut } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const navItems = [
-  { label: "Home", path: "/", icon: Home },
+  { label: "Home",     path: "/",         icon: Home      },
   { label: "Business", path: "/business", icon: Briefcase },
-  { label: "Gallery", path: "/gallery", icon: Image },
-  { label: "Profile", path: "/profile", icon: User },
+  { label: "Gallery",  path: "/gallery",  icon: Image     },
+  { label: "Profile",  path: "/profile",  icon: User      },
 ];
 
 const Navbar = () => {
   const { signOut } = useAuth();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 50,
+      // ── CHANGED: lighter black (was 0,0,0,0.88 → now 18,18,18,0.92) ──
+      background: "rgba(18,18,18,0.92)",
+      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      // subtle bottom glow so it lifts off the page
+      boxShadow: "0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.4)",
+    }}>
+      <div style={{
+        maxWidth: "1280px", margin: "0 auto", padding: "0 16px",
+        height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
         {/* Logo */}
-<Link to="/" className="flex items-center group">
-  <img
-    src={logo}
-    alt="KejShots Logo"
-    className="h-20 w-25 "
-  />
-</Link>
+        <Link to="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+          <img src={logo} alt="KejShots Logo" style={{ height: "80px", width: "auto" }} />
+        </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1">
+        {/* Nav links */}
+        <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "wrap", justifyContent: "center" }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -39,78 +42,63 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
+                style={{
+                  display: "flex", alignItems: "center", gap: "7px",
+                  padding: "8px 13px", borderRadius: "10px",
+                  fontSize: "13px", fontWeight: 500, textDecoration: "none",
+                  transition: "background 0.15s, color 0.15s",
+                  background: isActive
+                    ? "linear-gradient(135deg, hsl(0,84%,52%), hsl(0,78%,38%))"
+                    : "transparent",
+                  color: isActive ? "#fff" : "#9e9e9e",
+                  boxShadow: isActive ? "0 2px 12px -2px rgba(220,30,30,0.40)" : "none",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                    (e.currentTarget as HTMLElement).style.color = "#ebebeb";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                    (e.currentTarget as HTMLElement).style.color = "#9e9e9e";
+                  }
+                }}
               >
-                <Icon className="h-4 w-4" />
+                <Icon style={{ width: 15, height: 15 }} />
                 {item.label}
               </Link>
             );
           })}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className="hidden md:flex items-center gap-2 text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-
-          {/* Mobile toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
+        {/* Sign out */}
+        <button
+          onClick={signOut}
+          style={{
+            display: "flex", alignItems: "center", gap: "6px",
+            padding: "8px 14px", borderRadius: "10px",
+            background: "transparent", border: "1px solid rgba(255,255,255,0.09)",
+            color: "#9e9e9e", fontSize: "13px", fontWeight: 500,
+            cursor: "pointer", transition: "all 0.15s", whiteSpace: "nowrap", flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = "hsl(0,84%,52%)";
+            (e.currentTarget as HTMLElement).style.color = "hsl(0,84%,52%)";
+            (e.currentTarget as HTMLElement).style.background = "rgba(220,30,30,0.06)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)";
+            (e.currentTarget as HTMLElement).style.color = "#9e9e9e";
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+          }}
+        >
+          <LogOut style={{ width: 15, height: 15 }} />
+          Sign Out
+        </button>
       </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t bg-background animate-fade-in">
-          <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <button
-              onClick={() => { signOut(); setMobileOpen(false); }}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-all mt-2"
-            >
-              <LogOut className="h-5 w-5" />
-              Sign Out
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

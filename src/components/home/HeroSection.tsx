@@ -3,6 +3,41 @@ import { ArrowRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
 
+/* ─── All keyframes needed by the camera character ─────────────── */
+const CAMERA_STYLES = `
+  @keyframes confettiFall {
+    0%   { transform: translateY(0px)   rotate(var(--r, 0deg)); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(60px)  rotate(calc(var(--r, 0deg) + 180deg)); opacity: 0; }
+  }
+  @keyframes heartPop {
+    0%   { transform: scale(0.6) translateY(0px);  opacity: 0; }
+    20%  { transform: scale(1.2) translateY(-4px);  opacity: 1; }
+    60%  { transform: scale(1.0) translateY(-14px); opacity: 0.9; }
+    100% { transform: scale(0.7) translateY(-28px); opacity: 0; }
+  }
+  @keyframes starBurst {
+    0%,100% { transform: scale(0.7) rotate(0deg);   opacity: 0.4; }
+    50%      { transform: scale(1.2) rotate(180deg); opacity: 1;   }
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0.3); opacity: 0; }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
+  }
+  @keyframes shimmerLine {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%);  }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
 /* ─── Animated Camera Character ──────────────────────────────────────── */
 const CameraCharacter = () => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -147,11 +182,11 @@ const CameraCharacter = () => {
       const aL = getEl('cc-armL'), aR = getEl('cc-armR');
       const lL = getEl('cc-legL'), lR = getEl('cc-legR');
       const mouth = getEl('cc-mouth');
-      if (cg)  { cg.style.transform = `translateY(${Math.abs(Math.sin(t * 0.18)) * -14}px) rotate(${Math.sin(t * 0.12) * 3}deg)`; cg.style.transition = 'none'; }
-      if (aL)  { aL.style.transform = `rotate(${Math.sin(t * 0.18 + Math.PI) * 50}deg)`; aL.style.transformOrigin = '42px 158px'; }
-      if (aR)  { aR.style.transform = `rotate(${Math.sin(t * 0.18) * 50}deg)`; aR.style.transformOrigin = '278px 158px'; }
-      if (lL)  { lL.style.transform = `rotate(${Math.sin(t * 0.18) * 22}deg)`; lL.style.transformOrigin = '110px 264px'; }
-      if (lR)  { lR.style.transform = `rotate(${Math.sin(t * 0.18 + Math.PI) * 22}deg)`; lR.style.transformOrigin = '210px 264px'; }
+      if (cg)    { cg.style.transform = `translateY(${Math.abs(Math.sin(t * 0.18)) * -14}px) rotate(${Math.sin(t * 0.12) * 3}deg)`; cg.style.transition = 'none'; }
+      if (aL)    { aL.style.transform = `rotate(${Math.sin(t * 0.18 + Math.PI) * 50}deg)`; aL.style.transformOrigin = '42px 158px'; }
+      if (aR)    { aR.style.transform = `rotate(${Math.sin(t * 0.18) * 50}deg)`; aR.style.transformOrigin = '278px 158px'; }
+      if (lL)    { lL.style.transform = `rotate(${Math.sin(t * 0.18) * 22}deg)`; lL.style.transformOrigin = '110px 264px'; }
+      if (lR)    { lR.style.transform = `rotate(${Math.sin(t * 0.18 + Math.PI) * 22}deg)`; lR.style.transformOrigin = '210px 264px'; }
       if (mouth) mouth.setAttribute('d', `M128 236 Q160 ${258 + Math.sin(t * 0.18) * 5} 192 236`);
       if (t < 180) requestAnimationFrame(step);
       else { busyRef.current = false; const lL2 = getEl('cc-legL'), lR2 = getEl('cc-legR'); if (lL2) lL2.style.transform = ''; if (lR2) lR2.style.transform = ''; resetPose(); }
@@ -248,12 +283,15 @@ const CameraCharacter = () => {
 
   return (
     <div className="relative flex flex-col items-center select-none">
+      {/* ── Inject all required keyframes into <head> ── */}
+      <style>{CAMERA_STYLES}</style>
+
       {/* Speech bubble */}
       {speech && (
         <div
           style={{
             position: 'absolute', top: 8, right: 0, zIndex: 20,
-            background: 'white', border: '2.5px solid #ef4444', borderRadius: 14,
+            background: '#111', border: '2.5px solid #ef4444', borderRadius: 14,
             padding: '6px 14px', fontSize: 13, fontWeight: 700, color: '#ef4444',
             whiteSpace: 'nowrap', boxShadow: '0 4px 18px rgba(239,68,68,0.16)',
             animation: 'fadeInUp 0.2s ease-out forwards',
@@ -275,7 +313,7 @@ const CameraCharacter = () => {
         onMouseLeave={handleMouseLeave}
         onClick={handleBodyClick}
       >
-        {/* Confetti (CSS animated) */}
+        {/* Confetti */}
         {[
           { x: 70,  y: 30, c: '#ef4444', d: '0s',    s: 6, r: 30 },
           { x: 190, y: 18, c: '#fbbf24', d: '0.35s',  s: 5, r: 65 },
@@ -438,11 +476,11 @@ const CameraCharacter = () => {
           <button key={btn.label} onClick={btn.fn}
             style={{
               padding: '7px 16px', borderRadius: 999, border: '1.5px solid #ef4444',
-              background: 'white', color: '#ef4444', fontSize: 12, fontWeight: 600,
+              background: '#111', color: '#ef4444', fontSize: 12, fontWeight: 600,
               cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'DM Sans, sans-serif',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#ef4444'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'white'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#111'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
           >{btn.label}</button>
         ))}
       </div>
@@ -453,7 +491,7 @@ const CameraCharacter = () => {
           {photos.map((emoji, i) => (
             <div key={i} style={{
               width: 38, height: 30, borderRadius: 5, border: '2px solid #ef4444',
-              background: '#fff1f1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(220,30,30,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 16, animation: 'popIn 0.3s cubic-bezier(.4,1.6,.6,1) forwards',
             }}>{emoji}</div>
           ))}
@@ -466,29 +504,37 @@ const CameraCharacter = () => {
 /* ─── Hero Section ──────────────────────────────────────────────────── */
 const HeroSection = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
-      {/* Subtle dot grid */}
-      <div className="absolute inset-0 opacity-[0.05]"
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-transparent">
+      {/* Subtle dot grid overlay (on top of Layout's animated background) */}
+      <div className="absolute inset-0 opacity-[0.08]"
         style={{ backgroundImage: 'radial-gradient(circle, #ef4444 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }} />
 
       {/* Red blobs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, #ef4444 0%, transparent 70%)', opacity: 0.08 }} />
+        style={{ background: 'radial-gradient(circle, #ef4444 0%, transparent 70%)', opacity: 0.18 }} />
       <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-2xl"
-        style={{ background: 'radial-gradient(circle, #ef4444 0%, transparent 70%)', opacity: 0.06 }} />
+        style={{ background: 'radial-gradient(circle, #ef4444 0%, transparent 70%)', opacity: 0.14 }} />
+
+      {/* Inject shimmerLine keyframe for the title underline */}
+      <style>{`
+        @keyframes shimmerLine {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(200%);  }
+        }
+      `}</style>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Text */}
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border animate-fade-in-up delay-100"
-              style={{ backgroundColor: '#fff1f1', borderColor: 'rgba(239,68,68,0.25)', color: '#ef4444' }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+              style={{ backgroundColor: 'rgba(220,30,30,0.10)', borderColor: 'rgba(239,68,68,0.30)', color: '#f87171' }}>
               <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-sm font-semibold tracking-wide">Professional Photography Services</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.05] animate-fade-in-up delay-200"
-              style={{ color: '#0a0a0a' }}>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.05]"
+              style={{ color: '#ebebeb' }}>
               Every Frame<br />
               Tells a{' '}
               <span className="italic relative inline-block" style={{ color: '#ef4444' }}>
@@ -501,12 +547,12 @@ const HeroSection = () => {
               </span>
             </h1>
 
-            <p className="text-lg leading-relaxed max-w-xl animate-fade-in-up delay-300" style={{ color: '#666' }}>
+            <p className="text-lg leading-relaxed max-w-xl" style={{ color: '#9e9e9e' }}>
               At KejShots, we don't just take photos — we craft visual narratives that
               capture the emotion, beauty, and authenticity of your most cherished moments.
             </p>
 
-            <div className="flex flex-wrap gap-4 animate-fade-in-up delay-400">
+            <div className="flex flex-wrap gap-4">
               <Link to="/business">
                 <Button size="lg" className="h-14 px-8 text-base font-semibold gap-2 group transition-all duration-300"
                   style={{ background: '#ef4444', color: 'white', boxShadow: '0 8px 24px rgba(239,68,68,0.35)' }}
@@ -518,27 +564,27 @@ const HeroSection = () => {
               </Link>
               <Link to="/gallery">
                 <Button variant="outline" size="lg" className="h-14 px-8 text-base font-semibold gap-2 transition-all duration-300"
-                  style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#ef4444', background: 'white' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#fff1f1'; (e.currentTarget as HTMLElement).style.borderColor = '#ef4444'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'white'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(239,68,68,0.35)'; }}>
+                  style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#ef4444', background: '#111' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,30,30,0.15)'; (e.currentTarget as HTMLElement).style.borderColor = '#ef4444'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#111'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(239,68,68,0.35)'; }}>
                   <Play className="h-5 w-5 fill-red-500 text-red-500" />
                   View Gallery
                 </Button>
               </Link>
             </div>
 
-            <div className="flex gap-10 pt-2 animate-fade-in-up delay-500">
+            <div className="flex gap-10 pt-2">
               {[{ value: '500+', label: 'Projects Delivered' }, { value: '12+', label: 'Years Experience' }, { value: '98%', label: 'Happy Clients' }].map(s => (
                 <div key={s.label}>
                   <div className="text-3xl font-display font-bold" style={{ color: '#ef4444' }}>{s.value}</div>
-                  <div className="text-sm" style={{ color: '#999' }}>{s.label}</div>
+                  <div className="text-sm" style={{ color: '#7a7a7a' }}>{s.label}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Right: Interactive Camera Character */}
-          <div className="hidden lg:flex items-center justify-center animate-fade-in delay-300">
+          <div className="hidden lg:flex items-center justify-center">
             <CameraCharacter />
           </div>
         </div>
