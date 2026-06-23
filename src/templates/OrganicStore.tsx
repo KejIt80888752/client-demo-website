@@ -1,206 +1,443 @@
-import { useState } from "react";
-import { Leaf, ShoppingBasket, Star, Search, Heart, ChevronRight, Menu, X, Droplets, Wind, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Star, CheckCircle, Phone, Mail, MapPin, ArrowRight, Home, Layers, Palette, Users } from "lucide-react";
 
-const products = [
-  { id: 1, name: "Raw Wildflower Honey", price: 18, rating: 4.9, unit: "350g", category: "Pantry", img: "🍯", tag: "Organic", tagColor: "bg-amber-100 text-amber-700" },
-  { id: 2, name: "Cold-Pressed Olive Oil", price: 24, rating: 4.8, unit: "500ml", category: "Pantry", img: "🫒", tag: "Raw", tagColor: "bg-green-100 text-green-700" },
-  { id: 3, name: "Superfood Berry Mix", price: 32, rating: 4.7, unit: "200g", category: "Snacks", img: "🫐", tag: "Vegan", tagColor: "bg-purple-100 text-purple-700" },
-  { id: 4, name: "Herbal Sleep Tea", price: 15, rating: 4.9, unit: "30 bags", category: "Drinks", img: "🍵", tag: "Caffeine Free", tagColor: "bg-teal-100 text-teal-700" },
-  { id: 5, name: "Cacao Protein Powder", price: 45, rating: 4.6, unit: "500g", category: "Supplements", img: "🍫", tag: "Non-GMO", tagColor: "bg-brown-100 text-yellow-800" },
-  { id: 6, name: "Spirulina Capsules", price: 28, rating: 4.8, unit: "90 caps", category: "Supplements", img: "💊", tag: "Lab Tested", tagColor: "bg-lime-100 text-lime-700" },
+const NAV = ["Home","Services","Portfolio","About","Testimonials","Contact"];
+const C = { dark: "#3E2723", mid: "#6F4E37", light: "#C8A97E", cream: "#FFF8F0", white: "#FFFFFF", text: "#2C1810" };
+
+const SERVICES = [
+  { icon: <Home className="w-7 h-7"/>, title: "Residential Interiors", price: "From ₹1,200/sq.ft", desc: "Transform your home into a sanctuary of warmth and style. Living rooms, bedrooms, kitchens — complete makeovers." },
+  { icon: <Layers className="w-7 h-7"/>, title: "Commercial Spaces", price: "From ₹950/sq.ft", desc: "Office spaces, retail stores, restaurants — functional designs that make a lasting first impression on your clients." },
+  { icon: <Palette className="w-7 h-7"/>, title: "3D Visualisation", price: "From ₹8,000", desc: "Photorealistic 3D renders of your space before a single nail is hammered. See your dream space before it exists." },
+  { icon: <Users className="w-7 h-7"/>, title: "Design Consultation", price: "₹2,500/session", desc: "One-on-one session with a senior designer. Get expert advice, moodboards, and a personalised design roadmap." },
 ];
 
-const benefits = [
-  { icon: <Leaf className="w-6 h-6" />, label: "100% Organic", sub: "Certified by USDA" },
-  { icon: <Droplets className="w-6 h-6" />, label: "No Additives", sub: "Pure & natural always" },
-  { icon: <Wind className="w-6 h-6" />, label: "Eco Packaging", sub: "Plastic-free shipping" },
-  { icon: <Sun className="w-6 h-6" />, label: "Farm Direct", sub: "Traceable sourcing" },
+const PORTFOLIO = [
+  { title: "Brown Walnut Living Room", tag: "Residential", emoji: "🛋️" },
+  { title: "Warm Tone Master Bedroom", tag: "Residential", emoji: "🛏️" },
+  { title: "Espresso Kitchen Design", tag: "Kitchen", emoji: "🍳" },
+  { title: "Mocha Office Space", tag: "Commercial", emoji: "💼" },
+  { title: "Cafe Interiors — Koramangala", tag: "Hospitality", emoji: "☕" },
+  { title: "Boutique Retail Store", tag: "Commercial", emoji: "🏪" },
 ];
 
-export default function OrganicStore() {
-  const [basket, setBasket] = useState<number[]>([]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
+const TESTIMONIALS = [
+  { name: "Deepa & Arvind", role: "Homeowners, Whitefield", text: "Mocha Studio turned our bare flat into a warm, beautiful home. Every corner feels intentional. Best investment we've made!", rating: 5 },
+  { name: "Kavya Reddy", role: "Restaurant Owner", text: "They understood the café vibe we wanted instantly. The earthy tones and custom furniture they sourced are absolutely stunning.", rating: 5 },
+  { name: "Suresh Iyer", role: "Office Manager, IT Firm", text: "Our new office space has completely changed team morale. The layout is efficient, warm, and impresses every client who walks in.", rating: 5 },
+];
+
+const PROCESS = [
+  { step: "01", title: "Discovery Call", desc: "We understand your vision, lifestyle, budget, and timeline in a free 30-minute consultation." },
+  { step: "02", title: "Concept & Moodboard", desc: "Our designers craft a personalised moodboard with colour palette, materials, and layout concepts." },
+  { step: "03", title: "3D Design & Approval", desc: "You see your space in full 3D before execution begins. We refine until you love every detail." },
+  { step: "04", title: "Execution & Handover", desc: "Our trusted contractors execute the design on-time, on-budget. We do a final walkthrough together." },
+];
+
+export default function MochaStudio() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [qty, setQty] = useState<Record<number, number>>({});
+  const [activeNav, setActiveNav] = useState("Home");
+  const [activePortfolio, setActivePortfolio] = useState("All");
+  const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", budget: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const addToBasket = (id: number) => {
-    setBasket((p) => [...p, id]);
-    setQty((q) => ({ ...q, [id]: (q[id] || 0) + 1 }));
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    setActiveNav(id);
+    setMenuOpen(false);
+    document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  const toggleWish = (id: number) =>
-    setWishlist((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setTimeout(() => { setSubmitted(false); setForm({ name:"", email:"", phone:"", service:"", budget:"", message:"" }); }, 4000);
+  };
+
+  const tags = ["All", ...Array.from(new Set(PORTFOLIO.map(p => p.tag)))];
+  const filtered = activePortfolio === "All" ? PORTFOLIO : PORTFOLIO.filter(p => p.tag === activePortfolio);
 
   return (
-    <div className="min-h-screen font-sans" style={{ backgroundColor: "#f8f5f0", color: "#2d2a24" }}>
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-[#e8e0d4] shadow-sm">
-        <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-green-600" />
-            <span className="font-bold text-lg tracking-tight">Verdure</span>
+    <div style={{ fontFamily: "'Segoe UI', sans-serif", background: C.white, color: C.text }}>
+
+      {/* NAVBAR */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: scrolled ? C.white : "transparent",
+        boxShadow: scrolled ? `0 2px 20px ${C.mid}20` : "none",
+        borderBottom: scrolled ? `1px solid ${C.light}40` : "none",
+        transition: "all 0.3s",
+      }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 70, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: C.cream, fontWeight: 900, fontSize: 16 }}>M</span>
+            </div>
+            <span style={{ fontSize: 20, fontWeight: 800, color: C.dark, letterSpacing: "-0.3px" }}>Mocha <span style={{ color: C.mid }}>Studio</span></span>
           </div>
-          <div className="hidden md:flex gap-6 text-sm text-gray-500">
-            {["Shop", "About", "Our Farms", "Blog", "Recipes"].map((n) => (
-              <button key={n} className="hover:text-green-700 transition">{n}</button>
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }} className="ms-desktop">
+            {NAV.map(n => (
+              <button key={n} onClick={() => scrollTo(n)}
+                style={{ padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 500, transition: "all 0.2s",
+                  background: activeNav === n ? C.mid : "transparent", color: activeNav === n ? C.white : C.dark }}>
+                {n}
+              </button>
             ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-full"><Search className="w-4 h-4" /></button>
-            <button className="relative p-2 hover:bg-gray-100 rounded-full">
-              <ShoppingBasket className="w-4 h-4" />
-              {basket.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-green-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">{basket.length}</span>
-              )}
-            </button>
-            <button className="md:hidden p-2 hover:bg-gray-100 rounded-full" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            <button onClick={() => scrollTo("Contact")}
+              style={{ marginLeft: 8, padding: "10px 22px", borderRadius: 8, border: `2px solid ${C.dark}`, cursor: "pointer", fontSize: 14, fontWeight: 700,
+                background: "transparent", color: C.dark, transition: "all 0.2s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.dark; (e.currentTarget as HTMLElement).style.color = C.white; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = C.dark; }}>
+              Free Consultation
             </button>
           </div>
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "none", background: "none", border: "none", cursor: "pointer" }} className="ms-mobile">
+            {menuOpen ? <X style={{ color: C.dark }} /> : <Menu style={{ color: C.dark }} />}
+          </button>
         </div>
         {menuOpen && (
-          <div className="md:hidden px-5 pb-4 flex flex-col gap-2 text-sm text-gray-500 border-t border-gray-100">
-            {["Shop", "About", "Our Farms", "Blog", "Recipes"].map((n) => (
-              <button key={n} className="text-left py-1 hover:text-green-700">{n}</button>
+          <div style={{ background: C.white, borderTop: `1px solid ${C.light}40`, padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {NAV.map(n => (
+              <button key={n} onClick={() => scrollTo(n)}
+                style={{ padding: "12px 16px", borderRadius: 8, border: "none", cursor: "pointer", textAlign: "left", fontSize: 15,
+                  background: activeNav === n ? `${C.mid}15` : "transparent", color: activeNav === n ? C.mid : C.dark }}>
+                {n}
+              </button>
             ))}
+            <button onClick={() => scrollTo("Contact")}
+              style={{ marginTop: 8, padding: "12px 22px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700,
+                background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, color: C.white }}>
+              Free Consultation
+            </button>
           </div>
         )}
       </nav>
 
-      {/* Hero */}
-      <section
-        className="relative py-20 px-5 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #f8f5f0 100%)" }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1 space-y-5">
-            <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">
-              <Leaf className="w-3 h-3" /> Certified Organic · No Compromises
-            </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-[#2d2a24]">
-              Nourish Your Body<br />
-              <span className="text-green-600">Naturally.</span>
-            </h1>
-            <p className="text-gray-500 max-w-md leading-relaxed">
-              Handpicked from regenerative farms. Every product is traceable, pure, and packed with nature's goodness.
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              <button className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-full font-semibold text-sm flex items-center gap-2 transition shadow-lg shadow-green-200">
-                Shop Now <ChevronRight className="w-4 h-4" />
-              </button>
-              <button className="px-6 py-3 bg-white border border-green-200 text-green-700 rounded-full font-semibold text-sm hover:bg-green-50 transition">
-                Our Story
-              </button>
-            </div>
-            <p className="text-xs text-gray-400">⭐ 12,000+ happy customers · 4.9/5 average rating</p>
-          </div>
-          <div className="text-[130px] select-none drop-shadow-lg">🌿</div>
-        </div>
-      </section>
+      <style>{`
+        @media(max-width:768px){ .ms-desktop{display:none!important} .ms-mobile{display:flex!important} }
+        @media(min-width:769px){ .ms-mobile{display:none!important} }
+        input,textarea,select{ outline:none; font-family:inherit; }
+        input:focus,textarea:focus,select:focus{ border-color:${C.mid}!important; box-shadow:0 0 0 3px ${C.mid}20!important; }
+      `}</style>
 
-      {/* Benefits Strip */}
-      <section className="bg-white border-y border-[#e8e0d4] py-6 px-5">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {benefits.map(({ icon, label, sub }) => (
-            <div key={label} className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 text-green-700 rounded-xl">{icon}</div>
-              <div>
-                <p className="text-sm font-semibold">{label}</p>
-                <p className="text-xs text-gray-400">{sub}</p>
+      {/* HERO */}
+      <section id="home" style={{ minHeight: "100vh", display: "flex", alignItems: "center", background: C.cream, padding: "120px 24px 80px", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: `linear-gradient(135deg, ${C.light}20, ${C.mid}15)`, clipPath: "polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%)" }}/>
+        <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%", position: "relative", zIndex: 1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${C.mid}15`, borderRadius: 50, padding: "6px 16px", marginBottom: 24, border: `1px solid ${C.mid}25` }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 1 }}>Award Winning Interior Design</span>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Products */}
-      <section className="max-w-7xl mx-auto px-5 py-16">
-        <div className="text-center mb-10">
-          <p className="text-xs text-green-600 tracking-widest uppercase mb-2">Best Sellers</p>
-          <h2 className="text-3xl font-bold">From Earth to Your Table</h2>
-          <p className="text-gray-400 text-sm mt-2 max-w-md mx-auto">All products are lab-tested, non-GMO, and free from artificial additives.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((p) => (
-            <div key={p.id} className="bg-white rounded-3xl overflow-hidden border border-[#e8e0d4] hover:shadow-lg transition group">
-              <div className="relative bg-[#f8f5f0] p-8 flex items-center justify-center">
-                <span className="text-8xl group-hover:scale-110 transition duration-300">{p.img}</span>
-                <button
-                  onClick={() => toggleWish(p.id)}
-                  className="absolute top-3 right-3 p-1.5 bg-white rounded-full shadow-sm"
-                >
-                  <Heart className={`w-4 h-4 ${wishlist.includes(p.id) ? "fill-rose-400 text-rose-400" : "text-gray-300"}`} />
+              <h1 style={{ fontSize: "clamp(36px,5vw,60px)", fontWeight: 900, color: C.dark, lineHeight: 1.1, marginBottom: 20 }}>
+                Spaces That Feel Like <span style={{ color: C.mid, fontStyle: "italic" }}>Home</span>
+              </h1>
+              <p style={{ fontSize: 17, color: "#5D4037", lineHeight: 1.8, marginBottom: 36, maxWidth: 480 }}>
+                We design warm, functional, beautiful interiors rooted in earthy tones and timeless elegance. Your space, reimagined.
+              </p>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                <button onClick={() => scrollTo("Contact")}
+                  style={{ padding: "16px 32px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700,
+                    background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, color: C.white, display: "flex", alignItems: "center", gap: 8, boxShadow: `0 8px 30px ${C.mid}40` }}>
+                  Book Free Consultation <ArrowRight style={{ width: 18, height: 18 }}/>
                 </button>
-                <span className={`absolute top-3 left-3 text-xs px-2 py-0.5 rounded-full font-medium ${p.tagColor}`}>{p.tag}</span>
+                <button onClick={() => scrollTo("Portfolio")}
+                  style={{ padding: "16px 32px", borderRadius: 10, cursor: "pointer", fontSize: 15, fontWeight: 600,
+                    background: "transparent", color: C.dark, border: `2px solid ${C.mid}50` }}>
+                  View Our Work
+                </button>
               </div>
-              <div className="p-5 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm">{p.name}</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">{p.unit}</p>
+              <div style={{ display: "flex", gap: 36, marginTop: 48, flexWrap: "wrap" }}>
+                {[["150+","Projects Done"],["8+","Years Exp"],["98%","Client Happy"],["15+","Awards"]].map(([v, l]) => (
+                  <div key={l}>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: C.mid }}>{v}</div>
+                    <div style={{ fontSize: 12, color: "#8D6E63", marginTop: 2 }}>{l}</div>
                   </div>
-                  <span className="text-lg font-bold text-green-700">${p.price}</span>
-                </div>
-                <div className="flex items-center gap-1 text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-3 h-3 ${i < Math.floor(p.rating) ? "fill-current" : "text-gray-200"}`} />
-                  ))}
-                  <span className="text-xs text-gray-400 ml-1">{p.rating}</span>
-                </div>
-                <button
-                  onClick={() => addToBasket(p.id)}
-                  className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition"
-                >
-                  <ShoppingBasket className="w-4 h-4" />
-                  {qty[p.id] ? `In Basket (${qty[p.id]})` : "Add to Basket"}
-                </button>
+                ))}
               </div>
             </div>
-          ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ background: C.white, borderRadius: 24, padding: "40px", textAlign: "center", fontSize: 80, boxShadow: `0 8px 40px ${C.mid}20`, border: `1px solid ${C.light}40` }}>🛋️</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, borderRadius: 16, padding: "24px", textAlign: "center", fontSize: 48 }}>🛏️</div>
+                <div style={{ background: C.white, borderRadius: 16, padding: "24px", textAlign: "center", fontSize: 48, boxShadow: `0 4px 20px ${C.mid}15`, border: `1px solid ${C.light}30` }}>🍳</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Values Banner */}
-      <section
-        className="py-16 px-5 text-center"
-        style={{ background: "linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)" }}
-      >
-        <Leaf className="w-10 h-10 text-green-200 mx-auto mb-4" />
-        <h2 className="text-3xl font-bold text-white mb-3">1% of Revenue Funds Reforestation</h2>
-        <p className="text-green-200 max-w-lg mx-auto text-sm leading-relaxed mb-6">
-          We've planted over 80,000 trees globally. Every purchase you make directly supports regenerative farming and forest restoration.
-        </p>
-        <button className="px-8 py-3 bg-white text-green-800 rounded-full font-semibold text-sm hover:bg-green-50 transition">
-          Learn More
-        </button>
-      </section>
-
-      {/* Newsletter */}
-      <section className="bg-white py-14 px-5 text-center border-t border-[#e8e0d4]">
-        <h2 className="text-2xl font-bold mb-2">Get Weekly Wellness Tips</h2>
-        <p className="text-gray-400 text-sm mb-6">Recipes, health guides, and exclusive offers — straight to your inbox.</p>
-        <div className="flex max-w-sm mx-auto gap-2">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="flex-1 px-4 py-2.5 border border-[#e8e0d4] rounded-xl text-sm focus:outline-none focus:border-green-400"
-          />
-          <button className="px-5 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition whitespace-nowrap">
-            Subscribe
-          </button>
+      {/* SERVICES */}
+      <section id="services" style={{ padding: "100px 24px", background: C.white }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 60 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 2 }}>What We Do</span>
+            <h2 style={{ fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: C.dark, margin: "12px 0 16px" }}>Our Design Services</h2>
+            <p style={{ fontSize: 16, color: "#8D6E63", maxWidth: 500, margin: "0 auto" }}>From concept to completion, we handle every aspect of your interior transformation.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24 }}>
+            {SERVICES.map(s => (
+              <div key={s.title} style={{ background: C.cream, borderRadius: 20, padding: "36px 28px", border: `1px solid ${C.light}40`, transition: "all 0.3s", cursor: "default" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px ${C.mid}20`; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLElement).style.borderColor = `${C.mid}50`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.borderColor = `${C.light}40`; }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: `linear-gradient(135deg, ${C.dark}15, ${C.mid}25)`, display: "flex", alignItems: "center", justifyContent: "center", color: C.mid, marginBottom: 20 }}>
+                  {s.icon}
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: C.dark, marginBottom: 6 }}>{s.title}</h3>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.mid, display: "block", marginBottom: 10 }}>{s.price}</span>
+                <p style={{ fontSize: 14, color: "#8D6E63", lineHeight: 1.7, marginBottom: 20 }}>{s.desc}</p>
+                <button onClick={() => scrollTo("Contact")}
+                  style={{ padding: "8px 18px", borderRadius: 8, border: `1.5px solid ${C.mid}`, background: "transparent", color: C.mid, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.mid; (e.currentTarget as HTMLElement).style.color = C.white; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = C.mid; }}>
+                  Learn More
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="bg-[#2d2a24] text-gray-400 py-8 px-5 text-center text-xs">
-        <div className="flex justify-center items-center gap-2 mb-3">
-          <Leaf className="w-4 h-4 text-green-400" />
-          <span className="text-white font-bold text-base">Verdure</span>
+      {/* PORTFOLIO */}
+      <section id="portfolio" style={{ padding: "100px 24px", background: C.cream }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 2 }}>Our Work</span>
+            <h2 style={{ fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: C.dark, margin: "12px 0 16px" }}>Recent Projects</h2>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 40 }}>
+            {tags.map(tag => (
+              <button key={tag} onClick={() => setActivePortfolio(tag)}
+                style={{ padding: "8px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.2s",
+                  background: activePortfolio === tag ? `linear-gradient(135deg, ${C.dark}, ${C.mid})` : C.white,
+                  color: activePortfolio === tag ? C.white : C.mid,
+                  border: activePortfolio === tag ? "none" : `1.5px solid ${C.light}60` }}>
+                {tag}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 24 }}>
+            {filtered.map(p => (
+              <div key={p.title} style={{ background: C.white, borderRadius: 20, overflow: "hidden", boxShadow: `0 4px 20px ${C.mid}10`, border: `1px solid ${C.light}30`, transition: "all 0.3s", cursor: "pointer" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px ${C.mid}25`; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px ${C.mid}10`; (e.currentTarget as HTMLElement).style.transform = "none"; }}
+                onClick={() => scrollTo("Contact")}>
+                <div style={{ background: `linear-gradient(135deg, ${C.light}30, ${C.mid}20)`, height: 180, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 72 }}>
+                  {p.emoji}
+                </div>
+                <div style={{ padding: "20px 22px" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 1 }}>{p.tag}</span>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: C.dark, margin: "6px 0 10px" }}>{p.title}</h3>
+                  <span style={{ fontSize: 13, color: C.mid, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                    View Project <ArrowRight style={{ width: 14, height: 14 }}/>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex justify-center gap-5 mb-3">
-          {["Shop", "About", "Sustainability", "Contact", "Privacy"].map((l) => (
-            <button key={l} className="hover:text-white transition">{l}</button>
-          ))}
+      </section>
+
+      {/* ABOUT / PROCESS */}
+      <section id="about" style={{ padding: "100px 24px", background: `linear-gradient(135deg, ${C.dark} 0%, ${C.mid} 100%)` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 60 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.light, textTransform: "uppercase", letterSpacing: 2 }}>Our Process</span>
+            <h2 style={{ fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: C.white, margin: "12px 0 14px" }}>How We Work</h2>
+            <p style={{ fontSize: 16, color: `${C.cream}CC`, maxWidth: 480, margin: "0 auto" }}>A simple, collaborative process that puts you at the centre of every decision.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 24, marginBottom: 70 }}>
+            {PROCESS.map((p, i) => (
+              <div key={p.step} style={{ background: `${C.white}10`, border: `1px solid ${C.white}15`, borderRadius: 20, padding: "32px 24px" }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: C.light, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18 }}>
+                  <span style={{ fontWeight: 900, color: C.dark, fontSize: 18 }}>{i+1}</span>
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: C.white, marginBottom: 10 }}>{p.title}</h3>
+                <p style={{ fontSize: 14, color: `${C.cream}BB`, lineHeight: 1.7 }}>{p.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "center", background: `${C.white}10`, borderRadius: 24, padding: "40px", border: `1px solid ${C.white}15` }}>
+            <div>
+              <h3 style={{ fontSize: 28, fontWeight: 800, color: C.white, marginBottom: 14 }}>Why Choose Mocha Studio?</h3>
+              <p style={{ fontSize: 15, color: `${C.cream}CC`, lineHeight: 1.8, marginBottom: 20 }}>We're not just designers — we're space storytellers. Every project is a unique narrative built around you.</p>
+              {["Free initial consultation", "Fixed pricing — no hidden costs", "Handpicked artisan furniture sourcing", "Full project management included"].map(pt => (
+                <div key={pt} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+                  <CheckCircle style={{ width: 18, height: 18, color: C.light, flexShrink: 0 }}/>
+                  <span style={{ fontSize: 14, color: `${C.cream}DD` }}>{pt}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {[["150+","Projects"],["8+","Years"],["98%","Happy"],["15+","Awards"]].map(([num, label]) => (
+                <div key={label} style={{ background: `${C.white}10`, borderRadius: 14, padding: "24px 18px", textAlign: "center", border: `1px solid ${C.white}15` }}>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: C.light }}>{num}</div>
+                  <div style={{ fontSize: 13, color: `${C.cream}AA`, marginTop: 4 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <p>© 2026 Verdure Organics. Made with 🌱 for the planet.</p>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section id="testimonials" style={{ padding: "100px 24px", background: C.white }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 2 }}>Client Stories</span>
+            <h2 style={{ fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: C.dark, margin: "12px 0" }}>Spaces They Love</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 28 }}>
+            {TESTIMONIALS.map(t => (
+              <div key={t.name} style={{ background: C.cream, borderRadius: 20, padding: "36px 28px", border: `1px solid ${C.light}40`, transition: "all 0.3s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${C.mid}15`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+                <div style={{ display: "flex", gap: 3, marginBottom: 16 }}>
+                  {[...Array(t.rating)].map((_, i) => <Star key={i} style={{ width: 15, height: 15, fill: C.light, color: C.light }}/>)}
+                </div>
+                <p style={{ fontSize: 15, color: "#5D4037", lineHeight: 1.8, marginBottom: 24, fontStyle: "italic" }}>"{t.text}"</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ color: C.white, fontWeight: 700 }}>{t.name[0]}</span>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: C.dark, fontSize: 15 }}>{t.name}</div>
+                    <div style={{ fontSize: 13, color: "#8D6E63" }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" style={{ padding: "100px 24px", background: C.cream }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.mid, textTransform: "uppercase", letterSpacing: 2 }}>Let's Talk</span>
+            <h2 style={{ fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: C.dark, margin: "12px 0 16px" }}>Book Your Free Consultation</h2>
+            <p style={{ fontSize: 16, color: "#8D6E63", maxWidth: 480, margin: "0 auto" }}>Tell us about your space. We'll get back with a tailored proposal within 24 hours.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 60, alignItems: "start" }}>
+            <div>
+              {[
+                [<Phone style={{ width: 20, height: 20 }}/>, "Phone", "+91 80987 65432"],
+                [<Mail style={{ width: 20, height: 20 }}/>, "Email", "hello@mochastudio.in"],
+                [<MapPin style={{ width: 20, height: 20 }}/>, "Studio", "45 Design Street, HSR Layout, Bengaluru 560102"],
+              ].map(([icon, label, val]) => (
+                <div key={String(label)} style={{ display: "flex", gap: 16, marginBottom: 24, alignItems: "flex-start" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `${C.mid}15`, display: "flex", alignItems: "center", justifyContent: "center", color: C.mid, flexShrink: 0 }}>
+                    {icon as React.ReactNode}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#8D6E63", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>{String(label)}</div>
+                    <div style={{ fontSize: 15, color: C.dark, fontWeight: 600, marginTop: 4 }}>{String(val)}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, borderRadius: 16, padding: "28px", marginTop: 8, color: C.cream }}>
+                <h4 style={{ fontWeight: 700, marginBottom: 8, fontSize: 16 }}>Studio Visit Hours</h4>
+                <p style={{ fontSize: 14, opacity: 0.85, lineHeight: 1.7 }}>Mon – Fri: 10 AM – 7 PM<br/>Saturday: 11 AM – 5 PM<br/>Sunday: By appointment only</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ background: C.white, borderRadius: 24, padding: "44px", border: `1px solid ${C.light}40`, boxShadow: `0 8px 40px ${C.mid}10` }}>
+              {submitted && (
+                <div style={{ background: "#E8F5E9", border: "1px solid #4CAF50", borderRadius: 10, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+                  <CheckCircle style={{ width: 18, height: 18, color: "#4CAF50" }}/>
+                  <span style={{ color: "#2E7D32", fontWeight: 600, fontSize: 14 }}>Request received! We'll call you within 24 hours.</span>
+                </div>
+              )}
+              <h3 style={{ fontWeight: 800, color: C.dark, marginBottom: 24, fontSize: 20 }}>Tell Us About Your Project</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                {[["Full Name","name","text","Your full name"],["Phone","phone","tel","+91 00000 00000"]].map(([label, field, type, ph]) => (
+                  <div key={field} style={{ marginBottom: 16 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.dark, marginBottom: 6 }}>{label} <span style={{ color: C.mid }}>*</span></label>
+                    <input required type={type} placeholder={ph} value={(form as any)[field]}
+                      onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
+                      style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.light}60`, fontSize: 14, color: C.text, background: C.cream, boxSizing: "border-box", transition: "all 0.2s" }}/>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.dark, marginBottom: 6 }}>Email <span style={{ color: C.mid }}>*</span></label>
+                <input required type="email" placeholder="your@email.com" value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.light}60`, fontSize: 14, color: C.text, background: C.cream, boxSizing: "border-box", transition: "all 0.2s" }}/>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.dark, marginBottom: 6 }}>Service Needed</label>
+                  <select value={form.service} onChange={e => setForm(f => ({ ...f, service: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.light}60`, fontSize: 14, color: C.text, background: C.cream, transition: "all 0.2s" }}>
+                    <option value="">Select service</option>
+                    {SERVICES.map(s => <option key={s.title} value={s.title}>{s.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.dark, marginBottom: 6 }}>Budget Range</label>
+                  <select value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.light}60`, fontSize: 14, color: C.text, background: C.cream, transition: "all 0.2s" }}>
+                    <option value="">Select budget</option>
+                    {["Under ₹5L","₹5L – ₹10L","₹10L – ₹25L","₹25L+"].map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.dark, marginBottom: 6 }}>Tell Us About Your Space <span style={{ color: C.mid }}>*</span></label>
+                <textarea required placeholder="BHK type, current condition, what you love & hate about it, inspiration styles..." value={form.message}
+                  onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+                  rows={4} style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.light}60`, fontSize: 14, color: C.text, background: C.cream, resize: "vertical", boxSizing: "border-box", transition: "all 0.2s" }}/>
+              </div>
+              <button type="submit"
+                style={{ width: "100%", padding: "16px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700,
+                  background: `linear-gradient(135deg, ${C.dark}, ${C.mid})`, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 6px 24px ${C.mid}40` }}>
+                Book Free Consultation <ArrowRight style={{ width: 18, height: 18 }}/>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ background: C.dark, color: C.cream, padding: "60px 24px 30px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 40, marginBottom: 48 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: C.mid, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontWeight: 900, color: C.cream }}>M</span>
+                </div>
+                <span style={{ fontWeight: 800, fontSize: 18 }}>Mocha Studio</span>
+              </div>
+              <p style={{ fontSize: 14, color: `${C.cream}90`, lineHeight: 1.8 }}>Award-winning interior design studio crafting warm, timeless spaces since 2016.</p>
+            </div>
+            {[
+              ["Navigation", NAV],
+              ["Services", SERVICES.map(s => s.title)],
+              ["Contact", ["+91 80987 65432","hello@mochastudio.in","HSR Layout, Bengaluru"]],
+            ].map(([title, items]) => (
+              <div key={String(title)}>
+                <h4 style={{ fontWeight: 700, color: C.light, marginBottom: 14, fontSize: 15 }}>{String(title)}</h4>
+                {(items as string[]).map(item => (
+                  <div key={item} style={{ fontSize: 14, color: `${C.cream}90`, marginBottom: 8, cursor: "pointer" }}
+                    onClick={() => { const n = NAV.find(x => x === item); if(n) scrollTo(n); }}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${C.white}15`, paddingTop: 24, textAlign: "center", fontSize: 13, color: `${C.cream}55` }}>
+            © 2026 Mocha Studio Interior Design. All rights reserved.
+          </div>
+        </div>
       </footer>
     </div>
   );
