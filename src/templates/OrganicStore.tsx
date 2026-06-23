@@ -67,10 +67,10 @@ export default function MochaStudio() {
 
       {/* NAVBAR */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? C.white : "transparent",
-        boxShadow: scrolled ? `0 2px 20px ${C.mid}20` : "none",
-        borderBottom: scrolled ? `1px solid ${C.light}40` : "none",
+        position: "sticky", top: 0, zIndex: 50,
+        background: C.white,
+        boxShadow: `0 2px 20px ${C.mid}20`,
+        borderBottom: `1px solid ${C.light}40`,
         transition: "all 0.3s",
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 70, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -126,7 +126,7 @@ export default function MochaStudio() {
       `}</style>
 
       {/* HERO */}
-      <section id="home" style={{ minHeight: "100vh", display: "flex", alignItems: "center", background: C.cream, padding: "120px 24px 80px", position: "relative", overflow: "hidden" }}>
+      <section id="home" style={{ minHeight: "90vh", display: "flex", alignItems: "center", background: C.cream, padding: "60px 24px 80px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: `linear-gradient(135deg, ${C.light}20, ${C.mid}15)`, clipPath: "polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%)" }}/>
         <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%", position: "relative", zIndex: 1 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>

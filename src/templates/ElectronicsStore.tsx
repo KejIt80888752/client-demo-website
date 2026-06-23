@@ -58,11 +58,11 @@ export default function TerraCrafts() {
 
       {/* NAVBAR */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? C.white : "transparent",
-        boxShadow: scrolled ? "0 2px 20px rgba(62,39,35,0.12)" : "none",
+        position: "sticky", top: 0, zIndex: 50,
+        background: C.white,
+        boxShadow: "0 2px 20px rgba(62,39,35,0.12)",
         transition: "all 0.3s",
-        borderBottom: scrolled ? `1px solid ${C.light}40` : "none",
+        borderBottom: `1px solid ${C.light}40`,
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 70, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -120,7 +120,7 @@ export default function TerraCrafts() {
       `}</style>
 
       {/* HERO */}
-      <section id="home" style={{ background: `linear-gradient(135deg, ${C.dark} 0%, ${C.mid} 60%, ${C.light} 100%)`, padding: "140px 24px 100px", minHeight: "100vh", display: "flex", alignItems: "center" }}>
+      <section id="home" style={{ background: `linear-gradient(135deg, ${C.dark} 0%, ${C.mid} 60%, ${C.light} 100%)`, padding: "80px 24px 100px", minHeight: "90vh", display: "flex", alignItems: "center" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${C.white}20`, borderRadius: 50, padding: "6px 16px", marginBottom: 24, border: `1px solid ${C.white}30` }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4CAF50", display: "inline-block" }}/>

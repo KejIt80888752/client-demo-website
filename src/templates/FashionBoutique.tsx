@@ -59,10 +59,10 @@ export default function BrewAndBloom() {
 
       {/* NAVBAR */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? C.white : "transparent",
-        boxShadow: scrolled ? `0 2px 20px ${C.mid}20` : "none",
-        borderBottom: scrolled ? `1px solid ${C.light}40` : "none",
+        position: "sticky", top: 0, zIndex: 50,
+        background: C.white,
+        boxShadow: `0 2px 20px ${C.mid}20`,
+        borderBottom: `1px solid ${C.light}40`,
         transition: "all 0.3s",
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 70, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -114,7 +114,7 @@ export default function BrewAndBloom() {
       `}</style>
 
       {/* HERO */}
-      <section id="home" style={{ minHeight: "100vh", display: "flex", alignItems: "center", background: `linear-gradient(160deg, ${C.cream} 0%, #EDE0D4 50%, ${C.light}40 100%)`, padding: "120px 24px 80px" }}>
+      <section id="home" style={{ minHeight: "90vh", display: "flex", alignItems: "center", background: `linear-gradient(160deg, ${C.cream} 0%, #EDE0D4 50%, ${C.light}40 100%)`, padding: "60px 24px 80px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
           <div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${C.mid}15`, borderRadius: 50, padding: "6px 16px", marginBottom: 24, border: `1px solid ${C.mid}30` }}>
